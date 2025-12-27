@@ -81,7 +81,7 @@ const COLORS = [
 ];
 
 const DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw5KUWPAHXNfVtjwrNLvHJE1hilZuicEibYIFdivTAWtyNNsMU5-j4HLxJ5W8YgFvOEUw/exec";
-const DEFAULT_SHOP_NAME = "SmartyBill"; 
+const DEFAULT_SHOP_NAME = "SmartyBill Store"; 
 const DEFAULT_PASS_HASH = "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3"; // SHA-256 for AdminPOS123!
 const SECRET_GAS_HASH = "S29kZVJhaGFzaWExMjMh"; // Base64 for KodeRahasia123!
 
@@ -529,6 +529,52 @@ export default function POSApp() {
         showToast("Kategori Dihapus");
       }
     });
+  };
+
+  // --- FIXED: ADDED saveTransactionToHistory ---
+  const saveTransactionToHistory = (cartData, totalVal, paymentVal, taxVal, taxRateVal) => {
+    const trx = { 
+      id: `TRX-${Date.now()}`, 
+      orderNumber: orderNumber, 
+      date: new Date().toISOString(), 
+      cart: cartData, 
+      total: totalVal, 
+      payment: paymentVal, 
+      tax: taxVal, 
+      taxRate: taxRateVal, 
+      shopName: shopName 
+    };
+    
+    const updatedHistory = [trx, ...history].slice(0, 100);
+    setHistory(updatedHistory);
+    safeLocalStorage.setItem('pos_transaction_history', JSON.stringify(updatedHistory));
+    
+    setOrderNumber(prev => {
+      const next = prev + 1;
+      safeLocalStorage.setItem('pos_order_number', next);
+      return next;
+    });
+
+    // Send to Google Sheet if configured
+    if (scriptUrl && scriptUrl.startsWith('https://script.google.com/')) {
+        const payload = {
+            action: 'add_transaction',
+            order_number: trx.orderNumber,
+            date: new Date(trx.date).toLocaleString('id-ID'),
+            items: cartData.map(i => `${i.name} (${i.qty})`).join(', '),
+            total: totalVal,
+            payment: paymentVal,
+            change: paymentVal - totalVal,
+            tax: taxVal
+        };
+
+        fetch(scriptUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).catch(err => console.warn("Gagal simpan transaksi ke cloud:", err));
+    }
   };
 
   const handleDeleteTransaction = (id) => {
