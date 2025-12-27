@@ -44,7 +44,7 @@ import {
   Info, 
   Code, 
   Package, Zap, Star, Gift, ShoppingBag, Smartphone, Watch, Glasses, Shirt, Monitor, Book, Briefcase,
-  Eye, EyeOff, Ban, Unlock, Camera, ScanLine, RefreshCw, CameraOff
+  Eye, EyeOff, Ban, Unlock, Camera, ScanLine, RefreshCw, CameraOff, Phone // Icon Phone ditambahkan
 } from 'lucide-react';
 
 // --- DATA & KONSTANTA ---
@@ -235,6 +235,8 @@ export default function POSApp() {
   const [scriptUrl, setScriptUrl] = useState(() => safeLocalStorage.getItem('pos_script_url') || DEFAULT_SCRIPT_URL);
   const [shopName, setShopName] = useState(() => safeLocalStorage.getItem('pos_shop_name') || DEFAULT_SHOP_NAME);
   const [shopLogo, setShopLogo] = useState(() => safeLocalStorage.getItem('pos_shop_logo') || null);
+  // NEW: State untuk Nomor WA Tujuan
+  const [targetWhatsApp, setTargetWhatsApp] = useState(() => safeLocalStorage.getItem('pos_target_wa') || '');
 
   const [taxRate, setTaxRate] = useState(() => {
     const saved = safeLocalStorage.getItem('pos_tax_rate');
@@ -434,6 +436,8 @@ export default function POSApp() {
     safeLocalStorage.setItem('pos_shop_logo', shopLogo); 
     safeLocalStorage.setItem('pos_tax_rate', taxRate);
     safeLocalStorage.setItem('pos_tax_enabled', isTaxEnabled);
+    // NEW: Save Target WhatsApp
+    safeLocalStorage.setItem('pos_target_wa', targetWhatsApp); 
     safeLocalStorage.setItem('pos_categories', JSON.stringify(categories));
     safeLocalStorage.setItem('pos_receipt_options', JSON.stringify(receiptOptions));
     showToast("Pengaturan Disimpan");
@@ -644,7 +648,14 @@ export default function POSApp() {
     const sName = viewModeData ? viewModeData.shopName : shopName;
     const list = activeCart.map(i => `- ${i.name} (${i.qty}x): ${formatRupiah(i.price * i.qty)}`).join('%0a');
     const text = `*${sName}*%0aOrder #${currentOrderNumber}%0a${list}%0a----------------%0a*TOTAL: ${formatRupiah(activeTotal)}*%0aBayar: ${formatRupiah(activePayment)}%0aKembali: ${formatRupiah(activeChange)}`;
-    window.open(`https://wa.me/?text=${text}`, '_blank');
+    
+    // UPDATED: Gunakan nomor WA tujuan dari pengaturan jika ada
+    const number = targetWhatsApp ? targetWhatsApp.replace(/[^0-9]/g, '') : '';
+    const url = number 
+        ? `https://wa.me/${number}?text=${text}` // Kirim ke nomor spesifik
+        : `https://wa.me/?text=${text}`; // Buka kontak picker
+    
+    window.open(url, '_blank');
   };
 
   const handleShareLink = () => {
@@ -1071,6 +1082,13 @@ export default function POSApp() {
                               <input type="file" accept="image/*" onChange={handleLogoUpload} className="text-xs text-slate-500 file:mr-2 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"/>
                               {shopLogo && <button onClick={()=>setShopLogo(null)} className="text-xs text-red-500 hover:underline">Hapus</button>}
                            </div>
+                        </div>
+
+                        {/* INPUT WA TUJUAN (NEW) */}
+                        <div>
+                           <label className="text-xs font-bold text-slate-400 mb-1 flex items-center gap-2"><Phone size={14}/> Nomor WA Tujuan (Opsional)</label>
+                           <input className="w-full border p-2 rounded-lg mt-1 bg-gray-50 text-slate-800" value={targetWhatsApp} onChange={e=>setTargetWhatsApp(e.target.value)} placeholder="Contoh: 628123456789" />
+                           <p className="text-[10px] text-gray-400 mt-1">Kosongkan jika ingin memilih kontak manual saat kirim struk.</p>
                         </div>
 
                         {/* INPUT PAJAK */}
