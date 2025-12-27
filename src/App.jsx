@@ -81,7 +81,7 @@ const COLORS = [
 ];
 
 const DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw5KUWPAHXNfVtjwrNLvHJE1hilZuicEibYIFdivTAWtyNNsMU5-j4HLxJ5W8YgFvOEUw/exec";
-const DEFAULT_SHOP_NAME = "SmartyBill Store"; 
+const DEFAULT_SHOP_NAME = "SmartyBill"; 
 const DEFAULT_PASS_HASH = "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3"; // SHA-256 for AdminPOS123!
 const SECRET_GAS_HASH = "S29kZVJhaGFzaWExMjMh"; // Base64 for KodeRahasia123!
 
