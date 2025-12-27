@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* CSS Khusus untuk Mode Cetak (Print) */
+@media print {
+  /* Sembunyikan seluruh body website saat mencetak */
+  body {
+    visibility: hidden;
+    background-color: white;
+  }
+
+  /* Tampilkan HANYA area struk */
+  .printable-area {
+    visibility: visible !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: white;
+    box-shadow: none;
+  }
+
+  /* Pastikan semua elemen di dalam struk terlihat */
+  .printable-area * {
+    visibility: visible !important;
+  }
+
+  /* Kelas khusus untuk menyembunyikan elemen tertentu saat mencetak */
+  /* (seperti tombol 'Cetak', 'Simpan', dll) */
+  .no-print {
+    display: none !important;
+  }
+}
